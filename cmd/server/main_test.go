@@ -19,6 +19,23 @@ import (
 	"golang.org/x/net/http2/h2c"
 )
 
+// func TestMain(m *testing.M) {
+// 	server := &service.BackendServer{}
+// 	interceptors := connect.WithInterceptors(interceptor.Logger())
+
+// 	mux := http.NewServeMux()
+// 	path, handler := backendv1connect.NewBackendServiceHandler(server, interceptors)
+// 	mux.Handle(path, handler)
+
+// 	log.Printf("server is started at %s", "localhost:8080")
+
+// 	go http.ListenAndServe(
+// 		":8080",
+// 		// Use h2c so we can serve HTTP/2 without TLS.
+// 		h2c.NewHandler(mux, &http2.Server{}),
+// 	)
+// }
+
 func TestHttpRequest(t *testing.T) {
 	server := &service.BackendServer{}
 	interceptors := connect.WithInterceptors(interceptor.Logger())
@@ -73,6 +90,45 @@ func TestHttpRequest(t *testing.T) {
 	t.Log(string(body))
 }
 
+func TestGRPCWebClientRequest(t *testing.T) {
+	server := &service.BackendServer{}
+	interceptors := connect.WithInterceptors(interceptor.Logger())
+
+	mux := http.NewServeMux()
+	path, handler := backendv1connect.NewBackendServiceHandler(server, interceptors)
+	mux.Handle(path, handler)
+
+	log.Printf("server is started at %s", "localhost:8080")
+
+	go http.ListenAndServe(
+		":8080",
+		// Use h2c so we can serve HTTP/2 without TLS.
+		h2c.NewHandler(mux, &http2.Server{}),
+	)
+	ctx := context.Background()
+	// httpClient := &http.Client{
+	// 	Transport: &http2.Transport{
+	// 		TLSClientConfig: &tls.Config{
+	// 			InsecureSkipVerify: true,
+	// 		},
+	// 	},
+	// }
+	const endpont = "http://localhost:8080"
+	opts := []connect.ClientOption{
+		connect.WithGRPCWeb(),
+	}
+	client := backendv1connect.NewBackendServiceClient(http.DefaultClient, endpont, opts...)
+	res, err := client.SayHello(ctx, &connect.Request[backendv1.SayHelloRequest]{
+		Msg: &backendv1.SayHelloRequest{
+			Name: "yoshi",
+		},
+	})
+	if err != nil {
+		t.Fatalf("error %s", err)
+	}
+	t.Logf("messages: %s", res.Msg.GetMessage())
+}
+
 func TestGRPCClientRequest(t *testing.T) {
 	server := &service.BackendServer{}
 	interceptors := connect.WithInterceptors(interceptor.Logger())
@@ -88,7 +144,6 @@ func TestGRPCClientRequest(t *testing.T) {
 		// Use h2c so we can serve HTTP/2 without TLS.
 		h2c.NewHandler(mux, &http2.Server{}),
 	)
-
 	ctx := context.Background()
 	// httpClient := &http.Client{
 	// 	Transport: &http2.Transport{
@@ -111,5 +166,5 @@ func TestGRPCClientRequest(t *testing.T) {
 		t.Fatalf("error %s", err)
 	}
 	t.Logf("res: %#v", res)
-
+	t.Logf("messages: %s", res.Msg.GetMessage())
 }
