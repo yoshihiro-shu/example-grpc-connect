@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package backend.v1;
+
+service BackendService {
+  // Sends a greeting
+  rpc SayHello (SayHelloRequest) returns (SayHelloResponse);
+  // Sends a greetings Stream
+  rpc Greet(stream GreetRequest) returns (GreetResponse) {}
+}
+
+// The request message containing the user's name.
+message SayHelloRequest {
+  string name = 1;
+}
+
+// The response message containing the greetings
+message SayHelloResponse {
+  string message = 1;
+}
+
+message GreetRequest {
+  string name = 1;
+}
+
+message GreetResponse {
+  string greeting = 1;
+}

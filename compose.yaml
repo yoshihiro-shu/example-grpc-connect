@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: ["air", "-c", ".air.toml" ]
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "8080:8080"
+      - "2345:2345"
+    tty: true
+    security_opt:
+      - apparmor:unconfined
+    cap_add:
+      - SYS_PTRACE
+    networks:
+      - default
+
+# networks:
+#   tech-blog-admin-network:
+#     driver: bridge
+#     external: true
