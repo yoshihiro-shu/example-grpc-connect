@@ -13,4 +13,4 @@ require (
 	golang.org/x/text v0.18.0 // indirect
 )
 
-replace connectrpc.com/connect v1.17.0 => ../connect-go
+replace connectrpc.com/connect v1.17.0 => ./connect-go

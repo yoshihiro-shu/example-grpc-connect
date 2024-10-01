@@ -1,5 +1,13 @@
 # 概要
 
+## How to Set Up Environment
+
+Install grpc connect into local directory for debug.
+
+```sh
+git clone git@github.com:connectrpc/connect-go.git
+```
+
 ## How to Set Up Server
 
 ```sh
