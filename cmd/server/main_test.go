@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"testing"
 
 	"connectrpc.com/connect"
@@ -19,24 +20,9 @@ import (
 	"golang.org/x/net/http2/h2c"
 )
 
-// func TestMain(m *testing.M) {
-// 	server := &service.BackendServer{}
-// 	interceptors := connect.WithInterceptors(interceptor.Logger())
+const endpoint = "http://localhost:8080"
 
-// 	mux := http.NewServeMux()
-// 	path, handler := backendv1connect.NewBackendServiceHandler(server, interceptors)
-// 	mux.Handle(path, handler)
-
-// 	log.Printf("server is started at %s", "localhost:8080")
-
-// 	go http.ListenAndServe(
-// 		":8080",
-// 		// Use h2c so we can serve HTTP/2 without TLS.
-// 		h2c.NewHandler(mux, &http2.Server{}),
-// 	)
-// }
-
-func TestHttpRequest(t *testing.T) {
+func TestMain(m *testing.M) {
 	server := &service.BackendServer{}
 	interceptors := connect.WithInterceptors(interceptor.Logger())
 
@@ -51,6 +37,11 @@ func TestHttpRequest(t *testing.T) {
 		// Use h2c so we can serve HTTP/2 without TLS.
 		h2c.NewHandler(mux, &http2.Server{}),
 	)
+
+	os.Exit(m.Run())
+}
+
+func TestHttpRequest(t *testing.T) {
 	// リクエストボディの作成
 	requestBody, err := json.Marshal(map[string]string{
 		"name": "yoshi",
@@ -61,7 +52,7 @@ func TestHttpRequest(t *testing.T) {
 	}
 
 	// HTTPリクエストの作成
-	url := "http://localhost:8080/backend.v1.BackendService/SayHello"
+	url := endpoint + "/backend.v1.BackendService/SayHello"
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
 	if err != nil {
 		fmt.Println("リクエスト作成エラー:", err)
@@ -91,33 +82,11 @@ func TestHttpRequest(t *testing.T) {
 }
 
 func TestGRPCWebClientRequest(t *testing.T) {
-	server := &service.BackendServer{}
-	interceptors := connect.WithInterceptors(interceptor.Logger())
-
-	mux := http.NewServeMux()
-	path, handler := backendv1connect.NewBackendServiceHandler(server, interceptors)
-	mux.Handle(path, handler)
-
-	log.Printf("server is started at %s", "localhost:8080")
-
-	go http.ListenAndServe(
-		":8080",
-		// Use h2c so we can serve HTTP/2 without TLS.
-		h2c.NewHandler(mux, &http2.Server{}),
-	)
 	ctx := context.Background()
-	// httpClient := &http.Client{
-	// 	Transport: &http2.Transport{
-	// 		TLSClientConfig: &tls.Config{
-	// 			InsecureSkipVerify: true,
-	// 		},
-	// 	},
-	// }
-	const endpont = "http://localhost:8080"
 	opts := []connect.ClientOption{
 		connect.WithGRPCWeb(),
 	}
-	client := backendv1connect.NewBackendServiceClient(http.DefaultClient, endpont, opts...)
+	client := backendv1connect.NewBackendServiceClient(http.DefaultClient, endpoint, opts...)
 	res, err := client.SayHello(ctx, &connect.Request[backendv1.SayHelloRequest]{
 		Msg: &backendv1.SayHelloRequest{
 			Name: "yoshi",
@@ -130,33 +99,11 @@ func TestGRPCWebClientRequest(t *testing.T) {
 }
 
 func TestGRPCClientRequest(t *testing.T) {
-	server := &service.BackendServer{}
-	interceptors := connect.WithInterceptors(interceptor.Logger())
-
-	mux := http.NewServeMux()
-	path, handler := backendv1connect.NewBackendServiceHandler(server, interceptors)
-	mux.Handle(path, handler)
-
-	log.Printf("server is started at %s", "localhost:8080")
-
-	go http.ListenAndServe(
-		":8080",
-		// Use h2c so we can serve HTTP/2 without TLS.
-		h2c.NewHandler(mux, &http2.Server{}),
-	)
 	ctx := context.Background()
-	// httpClient := &http.Client{
-	// 	Transport: &http2.Transport{
-	// 		TLSClientConfig: &tls.Config{
-	// 			InsecureSkipVerify: true,
-	// 		},
-	// 	},
-	// }
-	const endpont = "http://localhost:8080"
 	opts := []connect.ClientOption{
 		connect.WithGRPC(),
 	}
-	client := backendv1connect.NewBackendServiceClient(http.DefaultClient, endpont, opts...)
+	client := backendv1connect.NewBackendServiceClient(http.DefaultClient, endpoint, opts...)
 	res, err := client.SayHello(ctx, &connect.Request[backendv1.SayHelloRequest]{
 		Msg: &backendv1.SayHelloRequest{
 			Name: "yoshi",
