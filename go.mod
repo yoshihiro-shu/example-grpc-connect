@@ -9,8 +9,9 @@ require (
 )
 
 require (
+	github.com/go-faker/faker/v4 v4.5.0 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	golang.org/x/text v0.18.0 // indirect
+	golang.org/x/text v0.19.0 // indirect
 )
 
 replace connectrpc.com/connect v1.17.0 => ./connect-go
