@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"os"
 	"strings"
 	"testing"
@@ -170,17 +169,9 @@ func TestGRPCClientRequest(t *testing.T) {
 
 func TestGRPCRequest(t *testing.T) {
 	ctx := context.Background()
-	// エンドポイントをパース
-	parsedURL, err := url.Parse(endpoint)
-	if err != nil {
-		log.Fatalf("failed to parse endpoint: %v", err)
-	}
-	// ホストとポートを取得
-	host := parsedURL.Hostname()
-	port := parsedURL.Port()
 
 	conn, err := grpc.NewClient(
-		host+":"+port,
+		httpServer.Listener.Addr().String(),
 		grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
 			InsecureSkipVerify: true,
 		})),
