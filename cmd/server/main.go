@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -18,14 +17,12 @@ func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	slog.SetDefault(logger)
 
-	server := &service.BackendServer{}
+	service := &service.BackendServer{}
 	interceptors := connect.WithInterceptors(interceptor.Logger())
 
 	mux := http.NewServeMux()
-	path, handler := backendv1connect.NewBackendServiceHandler(server, interceptors)
+	path, handler := backendv1connect.NewBackendServiceHandler(service, interceptors)
 	mux.Handle(path, handler)
-
-	log.Printf("server is started at %s", "localhost:8080")
 
 	http.ListenAndServe(
 		":8080",
