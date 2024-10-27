@@ -17,7 +17,7 @@ go run ./cmd/server/main.go
 http2のデバックログを表示したいとき
 
 ```sh
-GODEBUG="http2debug=2" go run cmd/server/main.go
+GODEBUG="http2client=0,http2server=0,http1debug=1,http2debug=2" go run cmd/server/main.go
 ```
 
 ## How to Call
